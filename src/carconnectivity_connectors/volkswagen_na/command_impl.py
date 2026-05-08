@@ -76,3 +76,73 @@ class SpinCommand(GenericCommand):
 
         def __str__(self) -> str:
             return self.value
+
+
+class RemoteStartCommand(GenericCommand):
+    """
+    RemoteStartCommand is a command class for remote engine start/stop (RST).
+
+    This is used for ICE/hybrid vehicles with TSP="ATC" (Aeris telematics).
+    The command triggers a 5-step challenge-response flow:
+      1. GET challenge (OAuth bearer)
+      2. POST session with spinHash → ATC carnetVehicleToken
+      3. GET challenge again (second, separate challenge)
+      4. POST climateControl/check with spinHash → roToken
+      5. POST/DELETE rst/v1/vehicle/{vehicleId} with roToken
+
+    See DEV_NOTES_REMOTE_START.md for full protocol documentation.
+    """
+
+    def __init__(self, name: str = "remote-start", parent: Optional[GenericObject] = None, initialization: Optional[Dict] = None) -> None:
+        super().__init__(name=name, parent=parent, initialization=initialization)
+
+    @property
+    def value(self) -> Optional[Union[str, Dict]]:
+        return super().value
+
+    @value.setter
+    def value(self, new_value: Optional[Union[str, Dict]]) -> None:
+        # Execute early hooks before parsing the value
+        new_value = self._execute_on_set_hook(new_value, early_hook=True)
+        if isinstance(new_value, RemoteStartCommand.Command):
+            newvalue_dict = {}
+            newvalue_dict["command"] = new_value
+            new_value = newvalue_dict
+        elif isinstance(new_value, str):
+            parser = ThrowingArgumentParser(prog="", add_help=False, exit_on_error=False)
+            parser.add_argument("command", help="Command to execute", type=RemoteStartCommand.Command, choices=list(RemoteStartCommand.Command))
+            try:
+                args = parser.parse_args(new_value.strip().split(sep=" "))
+            except argparse.ArgumentError as e:
+                raise SetterError(f"Invalid format for RemoteStartCommand: {e.message} {parser.format_usage()}") from e
+
+            newvalue_dict = {}
+            newvalue_dict["command"] = args.command
+            new_value = newvalue_dict
+        elif isinstance(new_value, dict):
+            if "command" in new_value and isinstance(new_value["command"], str):
+                if new_value["command"] in RemoteStartCommand.Command:
+                    new_value["command"] = RemoteStartCommand.Command(new_value["command"])
+                else:
+                    raise ValueError(f"Invalid value for RemoteStartCommand. Command must be one of {RemoteStartCommand.Command}")
+        if self._is_changeable:
+            # Execute late hooks before setting the value
+            new_value = self._execute_on_set_hook(new_value, early_hook=False)
+            self._set_value(new_value)
+        else:
+            raise TypeError("You cannot use this command. Command is not implemented.")
+
+    class Command(Enum):
+        """
+        Enum class representing different commands for remote start.
+
+        Attributes:
+            START (str): Command to start the engine remotely.
+            STOP (str): Command to stop the engine remotely.
+        """
+
+        START = "start"
+        STOP = "stop"
+
+        def __str__(self) -> str:
+            return self.value
