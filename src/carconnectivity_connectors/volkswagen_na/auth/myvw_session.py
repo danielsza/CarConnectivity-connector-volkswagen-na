@@ -188,6 +188,9 @@ class MyVWSession(VWWebSession):
             "client_id": self.client_id,
             "redirect_uri": self.redirect_uri,
             "code_verifier": self.verifier,
+            # VW now requires this field on token grants (2026-07-30); only
+            # presence is checked, not validity. See sstur/vwapp@1b70d55.
+            "play_integrity_token": "unavailable",
         }
 
         #        'grant_type': 'authorization_code',
@@ -291,7 +294,15 @@ class MyVWSession(VWWebSession):
         if headers is None:
             headers = self._app_headers("application/x-www-form-urlencoded")
 
-        data = {"grant_type": "refresh_token", "client_id": self.client_id, "code_verifier": self.verifier, "refresh_token": self.refresh_token}
+        data = {
+            "grant_type": "refresh_token",
+            "client_id": self.client_id,
+            "code_verifier": self.verifier,
+            "refresh_token": self.refresh_token,
+            # VW now requires this field on token grants (2026-07-30); only
+            # presence is checked, not validity. See sstur/vwapp@1b70d55.
+            "play_integrity_token": "unavailable",
+        }
 
         # Request new tokens using the refresh token
         try:
