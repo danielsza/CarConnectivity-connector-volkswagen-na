@@ -65,6 +65,7 @@ from carconnectivity.window_heating import WindowHeatings
 from carconnectivity_connectors.base.connector import BaseConnector
 from carconnectivity_connectors.volkswagen_na.auth.session_manager import SessionManager, SessionUser, Service
 from carconnectivity_connectors.volkswagen_na.auth.myvw_session import MyVWSession
+from carconnectivity_connectors.volkswagen_na.auth.mqtt_token_session import MQTTTokenSession
 from carconnectivity_connectors.volkswagen_na.auth.openid_session import AccessType
 from carconnectivity_connectors.volkswagen_na.vehicle import VolkswagenNAVehicle, VolkswagenNAElectricVehicle, VolkswagenNACombustionVehicle
 from carconnectivity_connectors.volkswagen_na.climatization import VolkswagenClimatization
@@ -203,17 +204,38 @@ class Connector(BaseConnector):
 
         self._manager: SessionManager = SessionManager(tokenstore=car_connectivity.get_tokenstore(), cache=car_connectivity.get_cache())
         service = Service.MY_VW
+        countrypart = "us"
         if "country" in config and config["country"] is not None and config["country"].lower() == "ca":
             service = Service.MY_VW_CA
-        session: requests.Session = self._manager.get_session(
-            service, SessionUser(username=self.active_config["username"], password=self.active_config["password"])
-        )
-        if not isinstance(session, MyVWSession):
-            raise AuthenticationError("Could not create session")
-        self.session: MyVWSession = session
-        countrypart = "us"
-        if "country" in config:
-            countrypart = config["country"]
+            countrypart = "ca"
+
+        # MQTT token relay mode — bypass Play Integrity by reading tokens
+        # from an external Frida relay via MQTT instead of doing OAuth directly.
+        # Enable with: "token_source": "mqtt" in the connector config.
+        if config.get("token_source") == "mqtt":
+            LOG.info("Using MQTT token relay mode (bypassing Play Integrity)")
+            session_user = SessionUser(
+                username=self.active_config["username"],
+                password=self.active_config["password"],
+            )
+            self.session: MyVWSession = MQTTTokenSession(
+                session_user=session_user,
+                mqtt_host=config.get("mqtt_host", "localhost"),
+                mqtt_port=int(config.get("mqtt_port", 1883)),
+                mqtt_user=config.get("mqtt_user"),
+                mqtt_pass=config.get("mqtt_pass"),
+                mqtt_topic=config.get("mqtt_token_topic", "vw/token_relay"),
+                country=countrypart,
+                cache=car_connectivity.get_cache().get("mqtt_session", {}),
+            )
+        else:
+            session: requests.Session = self._manager.get_session(
+                service, SessionUser(username=self.active_config["username"], password=self.active_config["password"])
+            )
+            if not isinstance(session, MyVWSession):
+                raise AuthenticationError("Could not create session")
+            self.session: MyVWSession = session
+
         self.base_url = f"https://b-h-s.spr.{countrypart}00.p.con-veh.net"
         self.session.retries = 3
         self.session.timeout = 180
