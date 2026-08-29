@@ -946,12 +946,22 @@ class Connector(BaseConnector):
                     elif exterior_status["secure"] == "UNSECURE":
                         self.update_enum(vehicle.doors.lock_state, Doors.LockState.UNLOCKED, captured_at)
                     else:
-                        # Derive overall lock state from individual door lock states when secure is UNKNOWN
-                        if "doorLockStatus" in exterior_status and exterior_status["doorLockStatus"] is not None:
+                        # secure is UNKNOWN — prefer top-level lockStatus (reported by
+                        # the vehicle's body controller) over per-door derivation, because
+                        # individual doorLockStatus entries can be stale or INVALID while
+                        # the overall lockStatus correctly reflects the actual state.
+                        if "lockStatus" in data and data["lockStatus"] in ("LOCKED", "UNLOCKED"):
+                            LOG.debug("Using top-level lockStatus (%s) — secure was UNKNOWN", data["lockStatus"])
+                            if data["lockStatus"] == "LOCKED":
+                                self.update_enum(vehicle.doors.lock_state, Doors.LockState.LOCKED, captured_at)
+                            else:
+                                self.update_enum(vehicle.doors.lock_state, Doors.LockState.UNLOCKED, captured_at)
+                        elif "doorLockStatus" in exterior_status and exterior_status["doorLockStatus"] is not None:
+                            # Derive overall lock state from individual door lock states
                             all_locked = True
                             any_unlocked = False
                             for did, dstatus in exterior_status["doorLockStatus"].items():
-                                if did == "doorLockStatusTimestamp" or dstatus == "NOTAVAILABLE":
+                                if did == "doorLockStatusTimestamp" or dstatus in ("NOTAVAILABLE", "INVALID"):
                                     continue
                                 if dstatus == "UNLOCKED":
                                     any_unlocked = True
