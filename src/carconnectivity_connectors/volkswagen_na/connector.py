@@ -1796,10 +1796,11 @@ class Connector(BaseConnector):
             precision: float = settings.target_temperature.precision if settings.target_temperature.precision is not None else 0.5
             if isinstance(attribute, TemperatureAttribute) and attribute.id == "target_temperature":
                 value = round(value / precision) * precision
+                api_temp_value = value
                 # Convert from internal Celsius to car's native unit for the API
                 if settings.unit_in_car == Temperature.F:
-                    value = round((value * 9 / 5 + 32) / precision) * precision
-                setting_dict["targetTemperature"]["temperature"] = value
+                    api_temp_value = round((value * 9 / 5 + 32) / precision) * precision
+                setting_dict["targetTemperature"]["temperature"] = api_temp_value
             else:
                 api_temp: float = round(settings.target_temperature.value / precision) * precision
                 # Convert from internal Celsius to car's native unit for the API
