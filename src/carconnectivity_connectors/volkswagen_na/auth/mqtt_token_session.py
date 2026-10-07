@@ -71,10 +71,7 @@ class MQTTTokenSession(MyVWSession):
         try:
             import paho.mqtt.client as mqtt_lib
         except ImportError:
-            raise ImportError(
-                "paho-mqtt is required for MQTT token relay. "
-                "Install with: pip install paho-mqtt"
-            )
+            raise ImportError("paho-mqtt is required for MQTT token relay. Install with: pip install paho-mqtt")
 
         self._mqtt_client = mqtt_lib.Client(
             client_id="carconnectivity-token-consumer",
@@ -142,7 +139,7 @@ class MQTTTokenSession(MyVWSession):
             if sub:
                 self.metadata["userId"] = sub
                 LOG.debug("Extracted user_id (sub) from token: %s", sub[:8])
-        except Exception:
+        except Exception:  # nosec B110
             pass
 
         # Set the token via the parent's setter (handles expires_at calculation)
@@ -208,9 +205,7 @@ class MQTTTokenSession(MyVWSession):
         else:
             LOG.warning("Timed out waiting for fresh token from relay")
             # Don't raise — the parent's request() will try login() next
-            raise TemporaryAuthenticationError(
-                "Token refresh timed out waiting for MQTT relay"
-            )
+            raise TemporaryAuthenticationError("Token refresh timed out waiting for MQTT relay")
 
     def close(self):
         """Clean up MQTT connection."""
@@ -218,6 +213,6 @@ class MQTTTokenSession(MyVWSession):
             try:
                 self._mqtt_client.loop_stop()
                 self._mqtt_client.disconnect()
-            except Exception:
+            except Exception:  # nosec B110
                 pass
         super().close()

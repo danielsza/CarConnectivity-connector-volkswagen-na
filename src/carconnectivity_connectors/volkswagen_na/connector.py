@@ -294,8 +294,7 @@ class Connector(BaseConnector):
                 self._stop_event.wait(interval)
             except Exception as err:
                 consecutive_critical_errors += 1
-                LOG.critical("Unexpected error during update (attempt %d/%d): %s",
-                             consecutive_critical_errors, max_critical_errors, traceback.format_exc())
+                LOG.critical("Unexpected error during update (attempt %d/%d): %s", consecutive_critical_errors, max_critical_errors, traceback.format_exc())
                 self.healthy._set_value(value=False)  # pylint: disable=protected-access
                 self.connection_state._set_value(value=ConnectionState.ERROR)  # pylint: disable=protected-access
                 if consecutive_critical_errors >= max_critical_errors:
