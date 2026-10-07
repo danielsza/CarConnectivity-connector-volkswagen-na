@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.0.0 (2026-10-07)
+
+
+### Bug Fixes
+
+* **ev:** Fix climate and charge values ([3849e77](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/3849e7738678406dc7fd2c24e609d6888d5ef759))
+* **ev:** Fix climate and charge values ([9e3c998](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/9e3c998acc1db020a2f6d6afe9f1949931ee18df))
+* **format:** Fix overrides for post, put, delete functions ([962de38](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/962de3874293fe38e98d922c2776e7efbf71c9f0))
+* **ci:** Fixup version tags to match PEP 440 format ([91371f0](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/91371f07ef24c65dfeb6b216cd27b490125ac712))
+* **ci:** Force new build on main ([72ffb39](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/72ffb39ba6c1c7cc48d54f284def1e1b7729c8bd))
+* **auth:** impersonate current myVW Android app to restore NA backend access ([57c7c04](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/57c7c047bfb6d83457b62252da6526f8057d8298))
+* make background thread resilient to auth/HTTP errors at startup ([919ba77](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/919ba77c5434a409855944fdbed43b2e4ca0b514))
+* **lint:** narrow exception and log instead of bare pass ([a5c2217](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/a5c2217091a71ac4d517f7987a53d6c84c882555))
+* normalize climate temperature to Celsius for consistent HA display ([64360ac](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/64360acd58c97b5e60f5c968a5fb92f0b4bab1c3))
+* preserve Celsius value in climate settings hook return ([eb6f368](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/eb6f3684e7c85d10826d60ddb560805f1db9ec13))
+* **auth:** Proactive token refresh and 403/401 retry logic ([412b4b0](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/412b4b00bc5e4bc06481832e4f227560295007e9))
+* **auth:** Request full OAuth scopes to resolve 403/401 errors ([afc9058](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/afc90586fd246b6132578daebb18991b48609568)), closes [#66](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/issues/66)
+* resolve requests dependency conflict with carconnectivity >= 0.11.9 ([3359ba1](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/3359ba11b3262026e2e76ec5718453304d0412ad))
+* **auth:** send play_integrity_token on token grants (VW change 2026-07-30) ([b6c90e9](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/b6c90e9c23aea2c1428950d85f0f745d2e4f4b96))
+* set climate settings as changeable before firing ENABLED event ([ba03aab](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/ba03aabe6058a24a78a11e37410700bd62d199c0))
+* **ci:** Set python build to exact tag version ([8a3c567](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/8a3c567d109b6217abfd3e1892f52c848de5b9a2))
+* **ci:** Trigger a new build ([4215c3d](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/4215c3dbd6bff0098ef4ddcbe400850cd9a1b07b))
+* **ci:** Trigger a patch build for beta ([0860491](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/0860491427d5b3e546f01529b86cf0e5b21abd23))
+* **SPIN:** Try and set SPIN if 404/403 ([75f5d3f](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/75f5d3f929470bd8b9270000bc0527c628765b11))
+* **ci:** Update dependencies ([d0737ad](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/d0737ad77a7c9163e70c63edd9bac618652c1b52))
+* Update README ([86623ed](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/86623ede0b559c38c53b3ecf4f507287abff6d59))
+* **SPIN:** Use access_token instead of id_token for Bearer auth ([45b838c](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/45b838cf2a7f70f1c1381dcfe6071aca9dcfe2d0))
+* **auth:** use backend-local 'sub' as user id on CA endpoints ([f708b54](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/f708b54080ca1712e61c1dc901b1e6429ab1c5e5)), closes [#76](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/issues/76)
+* **SPIN:** Use country-specific TSP value ([321bd6f](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/321bd6f48579fca156f495e6cb574fcf084f8b3d)), closes [#57](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/issues/57)
+
+
+### Features
+
+* add MQTT token relay support to bypass Play Integrity ([7c7ffe2](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/7c7ffe2c1a9762f9eff4d547585caf8fe3b4251b))
+
 ## [0.1.25](https://github.com/zackcornelius/CarConnectivity-connector-volkswagen-na/compare/v0.1.24...v0.1.25) (2026-08-03)
 
 
