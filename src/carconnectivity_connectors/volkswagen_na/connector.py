@@ -1892,6 +1892,8 @@ class Connector(BaseConnector):
             raise SetterError(f"Timeout during read: {timeout_error}") from timeout_error
         except requests.exceptions.RetryError as retry_error:
             raise SetterError(f"Retrying failed: {retry_error}") from retry_error
+        except HTTPError as http_error:
+            raise SetterError(f"HTTP error setting climatization settings: {http_error.response.status_code}: {http_error.response.text}") from http_error
         return value
 
     def __on_air_conditioning_start_stop(
@@ -1952,6 +1954,10 @@ class Connector(BaseConnector):
             raise CommandError(f"Timeout during read: {timeout_error}") from timeout_error
         except requests.exceptions.RetryError as retry_error:
             raise CommandError(f"Retrying failed: {retry_error}") from retry_error
+        except HTTPError as http_error:
+            raise CommandError(
+                f"HTTP error during air conditioning command: {http_error.response.status_code}: {http_error.response.text}"
+            ) from http_error
         return command_arguments
 
     def __on_honk_flash(self, honk_flash_command: HonkAndFlashCommand, command_arguments: Union[str, Dict[str, Any]]) -> Union[str, Dict[str, Any]]:
@@ -2022,6 +2028,10 @@ class Connector(BaseConnector):
             raise CommandError(f"Timeout during read: {timeout_error}") from timeout_error
         except requests.exceptions.RetryError as retry_error:
             raise CommandError(f"Retrying failed: {retry_error}") from retry_error
+        except HTTPError as http_error:
+            raise CommandError(
+                f"HTTP error during lock/unlock command: {http_error.response.status_code}: {http_error.response.text}"
+            ) from http_error
         return command_arguments
 
     def __do_set_spin(self, vehicle: VolkswagenNAVehicle, spin: str | None = None) -> bool:  # pylint: disable=unused-private-member
@@ -2207,6 +2217,10 @@ class Connector(BaseConnector):
             raise CommandError(f"Timeout during read: {timeout_error}") from timeout_error
         except requests.exceptions.RetryError as retry_error:
             raise CommandError(f"Retrying failed: {retry_error}") from retry_error
+        except HTTPError as http_error:
+            raise CommandError(
+                f"HTTP error during charging command: {http_error.response.status_code}: {http_error.response.text}"
+            ) from http_error
         return command_arguments
 
     def __on_charging_settings_change(self, attribute: GenericAttribute, value: Any) -> Any:
@@ -2322,6 +2336,10 @@ class Connector(BaseConnector):
             raise CommandError(f"Timeout during read: {timeout_error}") from timeout_error
         except requests.exceptions.RetryError as retry_error:
             raise CommandError(f"Retrying failed: {retry_error}") from retry_error
+        except HTTPError as http_error:
+            raise CommandError(
+                f"HTTP error during window heating command: {http_error.response.status_code}: {http_error.response.text}"
+            ) from http_error
         return command_arguments
 
     def get_name(self) -> str:
