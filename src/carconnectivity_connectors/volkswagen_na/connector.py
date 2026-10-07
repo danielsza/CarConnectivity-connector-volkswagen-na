@@ -251,6 +251,8 @@ class Connector(BaseConnector):
     def _background_loop(self) -> None:
         self._stop_event.clear()
         fetch: bool = True
+        consecutive_critical_errors: int = 0
+        max_critical_errors: int = 10
         self.connection_state._set_value(value=ConnectionState.CONNECTING)  # pylint: disable=protected-access
         while not self._stop_event.is_set():
             interval = 300
@@ -264,6 +266,7 @@ class Connector(BaseConnector):
                     self.last_update._set_value(value=datetime.now(tz=timezone.utc))  # pylint: disable=protected-access
                     if self.interval.value is not None:
                         interval: float = self.interval.value.total_seconds()
+                    consecutive_critical_errors = 0
                 except Exception:
                     self.connection_state._set_value(value=ConnectionState.ERROR)  # pylint: disable=protected-access
                     if self.interval.value is not None:
@@ -285,12 +288,24 @@ class Connector(BaseConnector):
                 LOG.error("Temporary authentification error during update (%s). Will try again after configured interval of %ss", str(err), interval)
                 self.connection_state._set_value(value=ConnectionState.ERROR)  # pylint: disable=protected-access
                 self._stop_event.wait(interval)
+            except (AuthenticationError, HTTPError) as err:
+                LOG.error("Auth/HTTP error during update (%s). Will try again after configured interval of %ss", str(err), interval)
+                self.connection_state._set_value(value=ConnectionState.ERROR)  # pylint: disable=protected-access
+                self._stop_event.wait(interval)
             except Exception as err:
-                LOG.critical("Critical error during update: %s", traceback.format_exc())
+                consecutive_critical_errors += 1
+                LOG.critical("Unexpected error during update (attempt %d/%d): %s",
+                             consecutive_critical_errors, max_critical_errors, traceback.format_exc())
                 self.healthy._set_value(value=False)  # pylint: disable=protected-access
                 self.connection_state._set_value(value=ConnectionState.ERROR)  # pylint: disable=protected-access
-                raise err
+                if consecutive_critical_errors >= max_critical_errors:
+                    LOG.critical("Too many consecutive critical errors (%d), background thread giving up", consecutive_critical_errors)
+                    raise err
+                backoff = min(interval * consecutive_critical_errors, 900)
+                LOG.error("Will retry in %ds", backoff)
+                self._stop_event.wait(backoff)
             else:
+                consecutive_critical_errors = 0
                 self.connection_state._set_value(value=ConnectionState.CONNECTED)  # pylint: disable=protected-access
                 self._stop_event.wait(interval)
         # When leaving the loop, set the connection state to disconnected
@@ -1723,7 +1738,13 @@ class Connector(BaseConnector):
             or (cache_date is not None and cache_date < (datetime.utcnow() - timedelta(seconds=self.active_config["max_age"])))
         ):
             try:
-                status_response: requests.Response = session.get(url, allow_redirects=False, token=token)
+                try:
+                    status_response: requests.Response = session.get(url, allow_redirects=False, token=token)
+                except HTTPError as http_err:
+                    # session.get() calls raise_for_status() which throws HTTPError on 4xx/5xx
+                    # before we can check the status code — catch it and fall through to our
+                    # own status-code handling below.
+                    status_response = http_err.response
                 self._record_elapsed(status_response.elapsed)
                 if status_response.status_code in (requests.codes["ok"], requests.codes["multiple_status"]):
                     data = status_response.json()
@@ -1738,7 +1759,10 @@ class Connector(BaseConnector):
                 elif status_response.status_code == requests.codes["unauthorized"]:
                     LOG.info("Server asks for new authorization")
                     session.login()
-                    status_response = session.get(url, allow_redirects=False, token=token)
+                    try:
+                        status_response = session.get(url, allow_redirects=False, token=token)
+                    except HTTPError as http_err:
+                        status_response = http_err.response
 
                     if status_response.status_code in (requests.codes["ok"], requests.codes["multiple_status"]):
                         data = status_response.json()
