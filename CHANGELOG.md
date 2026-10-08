@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.1](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/compare/v1.0.0...v1.0.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* catch HTTPError in all command handlers to surface VW API failures ([dd6e97f](https://github.com/danielsza/CarConnectivity-connector-volkswagen-na/commit/dd6e97f9bbab123a70d422a9bb353bdfcc5c5f33))
+
 # 1.0.0 (2026-10-07)
 
 
