@@ -1893,8 +1893,13 @@ class Connector(BaseConnector):
         except requests.exceptions.RetryError as retry_error:
             raise SetterError(f"Retrying failed: {retry_error}") from retry_error
         except HTTPError as http_error:
-            LOG.error("HTTP error setting climatization settings for vehicle %s: %s %s — response body: %s",
-                      vin, http_error.response.status_code, http_error.response.reason, http_error.response.text)
+            LOG.error(
+                "HTTP error setting climatization settings for vehicle %s: %s %s — response body: %s",
+                vin,
+                http_error.response.status_code,
+                http_error.response.reason,
+                http_error.response.text,
+            )
             raise SetterError(f"HTTP error setting climatization settings: {http_error.response.status_code}: {http_error.response.text}") from http_error
         return value
 
@@ -1933,8 +1938,7 @@ class Connector(BaseConnector):
         except HTTPError as http_error:
             LOG.info(f"Could not fetch SPIN token, trying to execute air conditioning command without token. Error was: {http_error}")
             token = None
-        LOG.info("Performing air conditioning %s command for vehicle %s (url=%s, has_spin_token=%s)",
-                 command_str, vehicle.vin.value, url, token is not None)
+        LOG.info("Performing air conditioning %s command for vehicle %s (url=%s, has_spin_token=%s)", command_str, vehicle.vin.value, url, token is not None)
         try:
             command_response: requests.Response = self.session.post(url, allow_redirects=True, token=token)
             if command_response.status_code != requests.codes["ok"]:
@@ -1959,12 +1963,15 @@ class Connector(BaseConnector):
         except requests.exceptions.RetryError as retry_error:
             raise CommandError(f"Retrying failed: {retry_error}") from retry_error
         except HTTPError as http_error:
-            LOG.error("HTTP error during air conditioning %s for vehicle %s: %s %s — response body: %s",
-                      command_str, vehicle.vin.value, http_error.response.status_code,
-                      http_error.response.reason, http_error.response.text)
-            raise CommandError(
-                f"HTTP error during air conditioning command: {http_error.response.status_code}: {http_error.response.text}"
-            ) from http_error
+            LOG.error(
+                "HTTP error during air conditioning %s for vehicle %s: %s %s — response body: %s",
+                command_str,
+                vehicle.vin.value,
+                http_error.response.status_code,
+                http_error.response.reason,
+                http_error.response.text,
+            )
+            raise CommandError(f"HTTP error during air conditioning command: {http_error.response.status_code}: {http_error.response.text}") from http_error
         LOG.info("Air conditioning %s command executed successfully for vehicle %s", command_str, vehicle.vin.value)
         return command_arguments
 
@@ -2037,11 +2044,14 @@ class Connector(BaseConnector):
         except requests.exceptions.RetryError as retry_error:
             raise CommandError(f"Retrying failed: {retry_error}") from retry_error
         except HTTPError as http_error:
-            LOG.error("HTTP error during lock/unlock for vehicle %s: %s %s — response body: %s",
-                      vin, http_error.response.status_code, http_error.response.reason, http_error.response.text)
-            raise CommandError(
-                f"HTTP error during lock/unlock command: {http_error.response.status_code}: {http_error.response.text}"
-            ) from http_error
+            LOG.error(
+                "HTTP error during lock/unlock for vehicle %s: %s %s — response body: %s",
+                vin,
+                http_error.response.status_code,
+                http_error.response.reason,
+                http_error.response.text,
+            )
+            raise CommandError(f"HTTP error during lock/unlock command: {http_error.response.status_code}: {http_error.response.text}") from http_error
         return command_arguments
 
     def __do_set_spin(self, vehicle: VolkswagenNAVehicle, spin: str | None = None) -> bool:  # pylint: disable=unused-private-member
@@ -2228,11 +2238,14 @@ class Connector(BaseConnector):
         except requests.exceptions.RetryError as retry_error:
             raise CommandError(f"Retrying failed: {retry_error}") from retry_error
         except HTTPError as http_error:
-            LOG.error("HTTP error during charging command for vehicle %s: %s %s — response body: %s",
-                      vehicle.vin.value, http_error.response.status_code, http_error.response.reason, http_error.response.text)
-            raise CommandError(
-                f"HTTP error during charging command: {http_error.response.status_code}: {http_error.response.text}"
-            ) from http_error
+            LOG.error(
+                "HTTP error during charging command for vehicle %s: %s %s — response body: %s",
+                vehicle.vin.value,
+                http_error.response.status_code,
+                http_error.response.reason,
+                http_error.response.text,
+            )
+            raise CommandError(f"HTTP error during charging command: {http_error.response.status_code}: {http_error.response.text}") from http_error
         return command_arguments
 
     def __on_charging_settings_change(self, attribute: GenericAttribute, value: Any) -> Any:
@@ -2295,8 +2308,13 @@ class Connector(BaseConnector):
         except requests.exceptions.RetryError as retry_error:
             raise SetterError(f"Retrying failed: {retry_error}") from retry_error
         except HTTPError as http_error:
-            LOG.error("HTTP error setting charging settings for vehicle %s: %s %s — response body: %s",
-                      vehicle.vin.value, http_error.response.status_code, http_error.response.reason, http_error.response.text)
+            LOG.error(
+                "HTTP error setting charging settings for vehicle %s: %s %s — response body: %s",
+                vehicle.vin.value,
+                http_error.response.status_code,
+                http_error.response.reason,
+                http_error.response.text,
+            )
             raise SetterError(f"HTTP error setting charging settings: {http_error}") from http_error
         return value
 
@@ -2351,11 +2369,14 @@ class Connector(BaseConnector):
         except requests.exceptions.RetryError as retry_error:
             raise CommandError(f"Retrying failed: {retry_error}") from retry_error
         except HTTPError as http_error:
-            LOG.error("HTTP error during window heating command for vehicle %s: %s %s — response body: %s",
-                      vin, http_error.response.status_code, http_error.response.reason, http_error.response.text)
-            raise CommandError(
-                f"HTTP error during window heating command: {http_error.response.status_code}: {http_error.response.text}"
-            ) from http_error
+            LOG.error(
+                "HTTP error during window heating command for vehicle %s: %s %s — response body: %s",
+                vin,
+                http_error.response.status_code,
+                http_error.response.reason,
+                http_error.response.text,
+            )
+            raise CommandError(f"HTTP error during window heating command: {http_error.response.status_code}: {http_error.response.text}") from http_error
         return command_arguments
 
     def get_name(self) -> str:
